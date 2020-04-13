@@ -1,4 +1,4 @@
-# Turbit Geo Classifier
+# Turbit Notification Selector & Indexer
 
 [![CircleCI](https://circleci.com/gh/udayangaac/turbit-nsi.svg?style=svg)](https://circleci.com/gh/udayangaac/turbit-nsi)
 <br/>
