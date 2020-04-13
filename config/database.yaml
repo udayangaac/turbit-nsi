@@ -1,0 +1,9 @@
+# Local database configurations
+host: 127.0.0.1
+port: 3306
+database: turbit_gc
+user_name: username
+password: password
+max_open_conn: 100
+max_idle_conn: 50
+conn_max_life_time: 10000
