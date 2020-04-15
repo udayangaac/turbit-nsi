@@ -2,16 +2,13 @@ package http
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	log_traceable "github.com/udayangaac/turbit-nsi/internal/lib/log-traceable"
 	"github.com/udayangaac/turbit-nsi/internal/service"
-	"github.com/udayangaac/turbit-nsi/internal/transport/http/schema"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -24,6 +21,15 @@ type WebService struct {
 func (w *WebService) Init() {
 	rootRouter := mux.NewRouter()
 	tnsiRouter := rootRouter.PathPrefix("/tnsi").Subrouter()
+
+	tnsiRouter.HandleFunc("/notification",
+		AddNotificationHandler(w.Services)).Methods(http.MethodPost)
+
+	tnsiRouter.HandleFunc("/notification/{notificationId}",
+		ModifyNotificationHandler(w.Services)).Methods(http.MethodPut)
+
+	tnsiRouter.HandleFunc("/notifications",
+		GetNotificationsHandler(w.Services)).Methods(http.MethodGet)
 
 	log.Info(log_traceable.GetMessage(context.Background(), "Server is starting, Port:"+fmt.Sprintf("%v", w.Port)))
 	w.server = &http.Server{
@@ -45,6 +51,24 @@ func (w *WebService) Stop() {
 	err := w.server.Shutdown(context.Background())
 	if err != nil {
 		log.Error(log_traceable.GetMessage(context.Background(), "Error shutting down application error.", err.Error()))
+	}
+}
+
+func AddNotificationHandler(services service.Container) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+
+	}
+}
+
+func ModifyNotificationHandler(services service.Container) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+
+	}
+}
+
+func GetNotificationsHandler(services service.Container) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+
 	}
 }
 

@@ -6,4 +6,5 @@ func InitConfigurations() {
 	fileManager := file_manager.NewYamlManager()
 	EnvConf.Read(fileManager)
 	DatabaseConf.Read(fileManager)
+	ElasticsearchConf.Read(fileManager)
 }

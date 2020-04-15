@@ -4,6 +4,8 @@ import (
 	"context"
 	log "github.com/sirupsen/logrus"
 	"github.com/udayangaac/turbit-nsi/internal/config"
+	external_service "github.com/udayangaac/turbit-nsi/internal/external-service"
+	"github.com/udayangaac/turbit-nsi/internal/external-service/elasticsearch"
 	log_traceable "github.com/udayangaac/turbit-nsi/internal/lib/log-traceable"
 	"github.com/udayangaac/turbit-nsi/internal/lib/orm"
 	"github.com/udayangaac/turbit-nsi/internal/service"
@@ -36,8 +38,21 @@ func main() {
 	//repos := repo.Container{
 	//
 	//}
-	// Inject repositories
-	services := service.Container{}
+
+	esOptns := elasticsearch.ClientOptions{
+		Addresses: config.ElasticsearchConf.Addresses,
+		Username:  config.ElasticsearchConf.Username,
+		Password:  config.ElasticsearchConf.Password,
+	}
+
+	extServices := external_service.Container{
+		ESConnector: elasticsearch.NewConnectorImpl(esOptns),
+	}
+
+	// Inject external services
+	services := service.Container{
+		GatewayService: service.NewGatewayService(extServices),
+	}
 
 	// Inject services
 	webService := http.WebService{
