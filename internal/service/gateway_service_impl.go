@@ -17,13 +17,13 @@ func NewGatewayService(extServiceContainer external_service.Container) GatewaySe
 }
 
 func (g *gatewayService) Add(ctx context.Context, document elasticsearch.Document) (err error) {
-
+	return
 }
 
 func (g *gatewayService) Update(ctx context.Context, document elasticsearch.Document) (err error) {
-
+	return
 }
 
 func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (notifications Notifications, err error) {
-
+	return
 }

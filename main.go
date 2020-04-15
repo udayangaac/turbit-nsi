@@ -6,6 +6,7 @@ import (
 	"github.com/udayangaac/turbit-nsi/internal/config"
 	external_service "github.com/udayangaac/turbit-nsi/internal/external-service"
 	"github.com/udayangaac/turbit-nsi/internal/external-service/elasticsearch"
+	geo_classifier "github.com/udayangaac/turbit-nsi/internal/external-service/geo-classifier"
 	log_traceable "github.com/udayangaac/turbit-nsi/internal/lib/log-traceable"
 	"github.com/udayangaac/turbit-nsi/internal/lib/orm"
 	"github.com/udayangaac/turbit-nsi/internal/service"
@@ -46,7 +47,8 @@ func main() {
 	}
 
 	extServices := external_service.Container{
-		ESConnector: elasticsearch.NewConnectorImpl(esOptns),
+		ESConnector:   elasticsearch.NewConnectorImpl(esOptns),
+		GeoClassifier: geo_classifier.NewGeoClassifier(config.GeoClassifierConf.BaseUrl),
 	}
 
 	// Inject external services
