@@ -11,25 +11,39 @@ type ClientOptions struct {
 	Addresses []string
 	Username  string
 	Password  string
-	Logger    Logger
 }
 
 type Document struct {
-	Id               int64  `json:"id"`
-	CompanyName      string `json:"company_name"`
-	Content          string `json:"content"`
-	NotificationType int    `json:"notification_type"`
-	StartTime        string `json:"start_time"`
-	EndDate          string `json:"end_date"`
-	LogoCompany      string `json:"logo_company"`
-	ImagePublisher   string `json:"image_publisher"`
-	Locations        []struct {
-		Lat      string `json:"lat"`
-		Lon      string `json:"lon"`
-		GeoHexId string `json:"geo_hex_id"`
-	} `json:"locations"`
+	Id               int64      `json:"id"`
+	CompanyName      string     `json:"company_name"`
+	Content          string     `json:"content"`
+	NotificationType int        `json:"notification_type"`
+	StartTime        string     `json:"start_time"`
+	EndDate          string     `json:"end_date"`
+	LogoCompany      string     `json:"logo_company"`
+	ImagePublisher   string     `json:"image_publisher"`
+	Category         string     `json:"category"`
+	Locations        []Location `json:"locations"`
+	GeoHexIds        []string   `json:"geo_hex_ids"`
 }
+
+type Location struct {
+	Lat string `json:"lat"`
+	Lon string `json:"lon"`
+}
+
+type Criteria struct {
+	Index          string
+	GeoHexId       []string
+	LastConsumedId int64
+	Category       string
+	PageIndex      int
+	PageSize       int
+}
+
+const ActiveNotificationsIndex = "active_notifications_index"
 
 type Connector interface {
 	AddDocument(ctx context.Context, index string, doc Document) (err error)
+	GetDocuments(ctx context.Context, criteria Criteria) (docs []Document, err error)
 }

@@ -1,0 +1,10 @@
+Create Index
+
+PUT /active_notifications_index
+
+{
+    "acknowledged": true,
+    "shards_acknowledged": true,
+    "index": "active_notifications_index"
+}
+

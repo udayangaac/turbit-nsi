@@ -2,12 +2,14 @@ package http
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	log_traceable "github.com/udayangaac/turbit-nsi/internal/lib/log-traceable"
 	"github.com/udayangaac/turbit-nsi/internal/service"
+	"github.com/udayangaac/turbit-nsi/internal/transport/http/schema"
 	"net/http"
 	"time"
 )
@@ -56,19 +58,184 @@ func (w *WebService) Stop() {
 
 func AddNotificationHandler(services service.Container) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
+		req := schema.NotificationRequest{}
+		decoder := json.NewDecoder(request.Body)
+		err := decoder.Decode(&req)
+		if err != nil {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			if err := json.NewEncoder(writer).Encode(schema.ErrorResp{Message: "invalid user id in path variable"}); err != nil {
+				writer.WriteHeader(http.StatusInternalServerError)
+				return
+			} else {
+				return
+			}
+		}
 
+		locations := []service.Location{}
+
+		for _, val := range req.Locations {
+			l := service.Location{}
+			l.Lon = val.Lon
+			l.Lat = val.Lat
+			locations = append(locations, l)
+		}
+
+		doc := service.Document{
+			Id:               req.ID,
+			CompanyName:      req.CompanyName,
+			Content:          req.Content,
+			NotificationType: req.NotificationType,
+			StartTime:        req.StartTime,
+			EndDate:          req.EndDate,
+			LogoCompany:      req.LogoCompany,
+			ImagePublisher:   req.ImagePublisher,
+			Category:         req.Category,
+			Locations:        locations,
+		}
+		err = services.GatewayService.Add(request.Context(), doc)
+		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			return
+		} else {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+
+			msg := schema.SuccessMessage{
+				Message: "Add notification successfully !",
+			}
+			if err = json.NewEncoder(writer).Encode(schema.SuccessResp{Data: msg}); err != nil {
+				writer.WriteHeader(http.StatusInternalServerError)
+				return
+			} else {
+				return
+			}
+		}
 	}
 }
 
 func ModifyNotificationHandler(services service.Container) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
+		req := schema.NotificationRequest{}
+		decoder := json.NewDecoder(request.Body)
+		err := decoder.Decode(&req)
+		if err != nil {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			if err := json.NewEncoder(writer).Encode(schema.ErrorResp{Message: "invalid request"}); err != nil {
+				writer.WriteHeader(http.StatusInternalServerError)
+				return
+			} else {
+				return
+			}
+		}
 
+		locations := []service.Location{}
+
+		for _, val := range req.Locations {
+			l := service.Location{}
+			l.Lon = val.Lon
+			l.Lat = val.Lat
+			locations = append(locations, l)
+		}
+
+		doc := service.Document{
+			Id:               req.ID,
+			CompanyName:      req.CompanyName,
+			Content:          req.Content,
+			NotificationType: req.NotificationType,
+			StartTime:        req.StartTime,
+			EndDate:          req.EndDate,
+			LogoCompany:      req.LogoCompany,
+			ImagePublisher:   req.ImagePublisher,
+			Category:         req.Category,
+			Locations:        locations,
+		}
+		err = services.GatewayService.Update(request.Context(), doc)
+		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			return
+		} else {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+
+			msg := schema.SuccessMessage{
+				Message: "Modified notification successfully !",
+			}
+			if err = json.NewEncoder(writer).Encode(schema.SuccessResp{Data: msg}); err != nil {
+				writer.WriteHeader(http.StatusInternalServerError)
+				return
+			} else {
+				return
+			}
+		}
 	}
 }
 
 func GetNotificationsHandler(services service.Container) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
+		req := schema.GetNotificationRequest{}
 
+		decoder := json.NewDecoder(request.Body)
+		err := decoder.Decode(&req)
+		if err != nil {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			if err := json.NewEncoder(writer).Encode(schema.ErrorResp{Message: "invalid request"}); err != nil {
+				writer.WriteHeader(http.StatusInternalServerError)
+				return
+			} else {
+				return
+			}
+		}
+
+		param := service.Param{
+			Lat:      req.Lat,
+			Lon:      req.Lon,
+			GeoRefId: req.GeoRefId,
+		}
+
+		//// latitude
+		//param.Lat, err = strconv.ParseFloat(req.Lat, 64)
+		//if err != nil {
+		//	writer.Header().Set("Content-Type", "application/json")
+		//	writer.WriteHeader(http.StatusBadRequest)
+		//	if err := json.NewEncoder(writer).Encode(schema.ErrorResp{Message: "invalid latitude in path variable"}); err != nil {
+		//		writer.WriteHeader(http.StatusInternalServerError)
+		//		return
+		//	} else {
+		//		return
+		//	}
+		//}
+		//
+		//// latitude
+		//param.Lon, err = strconv.ParseFloat(req.Lon, 64)
+		//if err != nil {
+		//	writer.Header().Set("Content-Type", "application/json")
+		//	writer.WriteHeader(http.StatusBadRequest)
+		//	if err := json.NewEncoder(writer).Encode(schema.ErrorResp{Message: "invalid longitude in path variable"}); err != nil {
+		//		writer.WriteHeader(http.StatusInternalServerError)
+		//		return
+		//	} else {
+		//		return
+		//	}
+		//}
+
+		notifications := service.Notifications{}
+		notifications, err = services.GatewayService.GetNotifications(request.Context(), param)
+		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			return
+		} else {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			if err = json.NewEncoder(writer).Encode(schema.SuccessResp{Data: notifications}); err != nil {
+				writer.WriteHeader(http.StatusInternalServerError)
+				return
+			} else {
+				return
+			}
+		}
 	}
 }
 

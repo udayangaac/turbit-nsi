@@ -7,3 +7,7 @@ type SuccessResp struct {
 type ErrorResp struct {
 	Message string `json:"message"`
 }
+
+type SuccessMessage struct {
+	Message string `json:"message"`
+}

@@ -20,7 +20,7 @@ type LocationSummery struct {
 type GeoRecordDetail struct {
 	Latitude  string `json:"latitude"`
 	Longitude string `json:"longitude"`
-	Offset    int    `json:"offset"`
+	Offset    int64  `json:"offset"`
 }
 
 type Record struct {

@@ -9,6 +9,7 @@ package schema
 //	"end_date":"2020-04-14 20:00:00",
 //	"logo_company":"",
 //	"image_publisher":"",
+//	"category" : "lat"
 //	"location":[
 //		{
 //		"lat":"6.948676",
@@ -25,8 +26,15 @@ type NotificationRequest struct {
 	EndDate          string `json:"end_date"`
 	LogoCompany      string `json:"logo_company"`
 	ImagePublisher   string `json:"image_publisher"`
-	Location         []struct {
+	Category         string `json:"category"`
+	Locations        []struct {
 		Lat string `json:"lat"`
 		Lon string `json:"lon"`
-	} `json:"location"`
+	} `json:"locations"`
+}
+
+type GetNotificationRequest struct {
+	Lat      string `json:"lat"`
+	Lon      string `json:"lon"`
+	GeoRefId string `json:"geo_ref_id"`
 }

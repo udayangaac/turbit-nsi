@@ -6,25 +6,33 @@
 package elasticsearch
 
 import (
-	"context"
+	"fmt"
+	"github.com/olivere/elastic"
 	log "github.com/sirupsen/logrus"
-	log_traceable "github.com/udayangaac/turbit-nsi/internal/lib/log-traceable"
 )
 
-type customLogger struct{}
+type errorLogger struct{}
+type infoLogger struct{}
+type traceLogger struct{}
 
-func NewDefaultLogger() Logger {
-	return new(customLogger)
+func NewErrorLogger() elastic.Logger {
+	return &errorLogger{}
+}
+func NewInfoLogger() elastic.Logger {
+	return &infoLogger{}
+}
+func NewTraceLogger() elastic.Logger {
+	return &traceLogger{}
 }
 
-func (c *customLogger) Error(ctx context.Context, message string) {
-	log.Error(log_traceable.GetMessage(ctx, message))
+func (e errorLogger) Printf(format string, v ...interface{}) {
+	log.Error(fmt.Sprintf(format, v...))
 }
 
-func (c *customLogger) Info(ctx context.Context, message string) {
-	log.Error(log_traceable.GetMessage(ctx, message))
+func (e traceLogger) Printf(format string, v ...interface{}) {
+	log.Trace(fmt.Sprintf(format, v...))
 }
 
-func (c *customLogger) Trace(ctx context.Context, message string) {
-	log.Error(log_traceable.GetMessage(ctx, message))
+func (e infoLogger) Printf(format string, v ...interface{}) {
+	log.Info(fmt.Sprintf(format, v...))
 }
