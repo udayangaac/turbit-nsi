@@ -6,9 +6,9 @@ import (
 )
 
 type Notifications struct {
-	Offset    int
-	RefId     string
-	Documents []elasticsearch.Document
+	//Offset    int                      `json:"offset"`
+	RefId     string                   `json:"ref_id"`
+	Documents []elasticsearch.Document `json:"documents"`
 }
 
 type Param struct {

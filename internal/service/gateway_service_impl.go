@@ -108,10 +108,11 @@ func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (not
 	summery := geo_classifier.LocationSummery{}
 
 	notifications = Notifications{
-		Offset:    -1,
-		RefId:     "NONE",
+		// Offset:    -1,
+		RefId:     "",
 		Documents: make([]elasticsearch.Document, 0),
 	}
+
 	userDetails := geo_classifier.UserDetail{
 		Latitude:  param.Lat,
 		Longitude: param.Lon,
@@ -120,15 +121,16 @@ func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (not
 	}
 
 	if summery, err = g.ExtServiceContainer.GeoClassifier.GetLocationSummery(ctx, userDetails); err != nil {
-		return
+		return // err
 	}
 
 	if summery.Data.CurrentOffset == -1 && param.IsOffsetEnable {
+		notifications.RefId = summery.Data.GeoRef
 		return
 	}
 
 	if geoHexId, err = getGeoHexId(summery.Data.GeoRef); err != nil {
-		return
+		return // err
 	}
 
 	// geo reference generator
@@ -142,7 +144,7 @@ func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (not
 	}
 
 	notifications.Documents, err = g.ExtServiceContainer.ESConnector.GetDocuments(ctx, criteria)
-	notifications.Offset = summery.Data.CurrentOffset
+	// notifications.Offset = summery.Data.CurrentOffset
 	// Geo reference id
 	notifications.RefId = summery.Data.GeoRef
 	return
