@@ -16,8 +16,6 @@ This Service responsible for getting notification list based on location (Phase 
 PUT /tnsi/notification HTTP/1.1
 Host: localhost:3001
 Content-Type: application/json
-Cache-Control: no-cache
-Postman-Token: 7ef402f5-f99f-c08e-1dea-26b57551d95f
 
 {
 	"id": <number>,
@@ -60,8 +58,6 @@ Postman-Token: 7ef402f5-f99f-c08e-1dea-26b57551d95f
 PUT /tnsi/notification/{notification_id} HTTP/1.1
 Host: localhost:3001
 Content-Type: application/json
-Cache-Control: no-cache
-Postman-Token: 7ef402f5-f99f-c08e-1dea-26b57551d95f
 
 {
 	"id": <number>,
@@ -100,6 +96,10 @@ Postman-Token: 7ef402f5-f99f-c08e-1dea-26b57551d95f
 
 - Request
 ```
+POST /tnsi/notifications HTTP/1.1
+Host: localhost:3001
+Content-Type: application/json
+
 {
 	"lat": "6.814360",
     "lon": "81.059219",
