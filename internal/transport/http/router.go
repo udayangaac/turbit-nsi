@@ -101,7 +101,7 @@ func AddNotificationHandler(services service.Container) http.HandlerFunc {
 			return
 		} else {
 			writer.Header().Set("Content-Type", "application/json")
-			writer.WriteHeader(http.StatusBadRequest)
+			writer.WriteHeader(http.StatusOK)
 
 			msg := schema.SuccessMessage{
 				Message: "Add notification successfully !",
