@@ -60,7 +60,6 @@ func AddNotificationHandler(services service.Container) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 
 		ctx := getTraceableContext(request)
-
 		req := schema.NotificationRequest{}
 		decoder := json.NewDecoder(request.Body)
 		err := decoder.Decode(&req)
@@ -93,7 +92,7 @@ func AddNotificationHandler(services service.Container) http.HandlerFunc {
 			EndDate:          req.EndDate,
 			LogoCompany:      req.LogoCompany,
 			ImagePublisher:   req.ImagePublisher,
-			Category:         req.Category,
+			Categories:       req.Categories,
 			Locations:        locations,
 		}
 		err = services.GatewayService.Add(ctx, doc)
@@ -154,7 +153,7 @@ func ModifyNotificationHandler(services service.Container) http.HandlerFunc {
 			EndDate:          req.EndDate,
 			LogoCompany:      req.LogoCompany,
 			ImagePublisher:   req.ImagePublisher,
-			Category:         req.Category,
+			Categories:       req.Categories,
 			Locations:        locations,
 		}
 		err = services.GatewayService.Update(ctx, doc)
@@ -199,10 +198,12 @@ func GetNotificationsHandler(services service.Container) http.HandlerFunc {
 		}
 
 		param := service.Param{
-			Lat:      req.Lat,
-			Lon:      req.Lon,
-			GeoRefId: req.GeoRefId,
-			UserId:   req.UserId,
+			Lat:            req.Lat,
+			Lon:            req.Lon,
+			GeoRefId:       req.GeoRefId,
+			UserId:         req.UserId,
+			IsOffsetEnable: req.IsNewest,
+			Categories:     req.Categories,
 		}
 
 		//// latitude

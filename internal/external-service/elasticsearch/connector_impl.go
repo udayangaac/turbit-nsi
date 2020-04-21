@@ -88,6 +88,7 @@ func (s *connector) GetDocuments(ctx context.Context, criteria Criteria) (docs [
 
 	query := elastic.NewBoolQuery().Must(
 		elastic.NewTermsQuery("geo_hex_ids", strings.Join(criteria.GeoHexId, ",")),
+		elastic.NewTermsQuery("categories", strings.Join(criteria.Categories, ",")),
 		elastic.NewRangeQuery("id").Gt(criteria.LastConsumedId).IncludeLower(true).IncludeUpper(false),
 	)
 

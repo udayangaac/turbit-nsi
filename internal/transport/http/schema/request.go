@@ -18,15 +18,15 @@ package schema
 //}
 
 type NotificationRequest struct {
-	ID               int64  `json:"id"`
-	CompanyName      string `json:"company_name"`
-	Content          string `json:"content"`
-	NotificationType int    `json:"notification_type"`
-	StartTime        string `json:"start_time"`
-	EndDate          string `json:"end_date"`
-	LogoCompany      string `json:"logo_company"`
-	ImagePublisher   string `json:"image_publisher"`
-	Category         string `json:"category"`
+	ID               int64    `json:"id"`
+	CompanyName      string   `json:"company_name"`
+	Content          string   `json:"content"`
+	NotificationType int      `json:"notification_type"`
+	StartTime        string   `json:"start_time"`
+	EndDate          string   `json:"end_date"`
+	LogoCompany      string   `json:"logo_company"`
+	ImagePublisher   string   `json:"image_publisher"`
+	Categories       []string `json:"categories"`
 	Locations        []struct {
 		Lat string `json:"lat"`
 		Lon string `json:"lon"`
@@ -34,8 +34,10 @@ type NotificationRequest struct {
 }
 
 type GetNotificationRequest struct {
-	Lat      string `json:"lat"`
-	Lon      string `json:"lon"`
-	GeoRefId string `json:"geo_ref_id"`
-	UserId   int    `json:"user_id"`
+	Lat        string   `json:"lat"`
+	Lon        string   `json:"lon"`
+	GeoRefId   string   `json:"geo_ref_id"`
+	UserId     int      `json:"user_id"`
+	Categories []string `json:"categories"`
+	IsNewest   bool     `json:"is_newest"`
 }

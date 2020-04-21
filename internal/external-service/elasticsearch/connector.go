@@ -22,7 +22,7 @@ type Document struct {
 	EndDate          string     `json:"end_date"`
 	LogoCompany      string     `json:"logo_company"`
 	ImagePublisher   string     `json:"image_publisher"`
-	Category         string     `json:"category"`
+	Categories       []string   `json:"categories"`
 	Locations        []Location `json:"locations"`
 	GeoHexIds        []string   `json:"geo_hex_ids"`
 }
@@ -36,7 +36,7 @@ type Criteria struct {
 	Index          string
 	GeoHexId       []string
 	LastConsumedId int64
-	Category       string
+	Categories     []string
 	PageIndex      int
 	PageSize       int
 }

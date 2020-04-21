@@ -12,9 +12,11 @@ type Notifications struct {
 }
 
 type Param struct {
-	Lat, Lon string
-	GeoRefId string
-	UserId   int
+	Lat, Lon       string
+	GeoRefId       string
+	UserId         int
+	IsOffsetEnable bool
+	Categories     []string
 }
 
 type Document struct {
@@ -26,7 +28,7 @@ type Document struct {
 	EndDate          string     `json:"end_date"`
 	LogoCompany      string     `json:"logo_company"`
 	ImagePublisher   string     `json:"image_publisher"`
-	Category         string     `json:"category"`
+	Categories       []string   `json:"categories"`
 	Locations        []Location `json:"locations"`
 }
 

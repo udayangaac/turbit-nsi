@@ -68,7 +68,7 @@ Content-Type: application/json
     "end_date": <time stamp>,
     "logo_company": <image_url>,
     "image_publisher": <image_url>,
-    "category": "<category_name>",
+    "categories": ["kfc","food"],
     "locations": [
         {
             "lat": "6.714360",
@@ -105,6 +105,8 @@ Content-Type: application/json
     "lon": "81.059219",
     "geo_ref_id":<geo_ref_id>, //optional
     "user_id":<id>
+    "categories":["food"],
+    "is_newest": false
 }
 ```
 
@@ -124,7 +126,7 @@ Content-Type: application/json
                 "end_date": "",
                 "logo_company": "",
                 "image_publisher": "",
-                "category": "",
+                "categories": ["kfc","food"],
                 "locations": [
                     {
                         "lat": "6.814360",

@@ -34,7 +34,7 @@ func TestConnector_AddDocument(t *testing.T) {
 		EndDate:          "",
 		LogoCompany:      "",
 		ImagePublisher:   "",
-		Category:         "",
+		Categories:       []string{"a"},
 		GeoHexIds:        geoHexIds,
 	}
 
@@ -47,7 +47,7 @@ func TestConnector_AddDocument(t *testing.T) {
 		EndDate:          "",
 		LogoCompany:      "",
 		ImagePublisher:   "",
-		Category:         "",
+		Categories:       []string{"a"},
 		GeoHexIds:        geoHexIds,
 	}
 
@@ -69,7 +69,7 @@ func TestConnector_AddDocument(t *testing.T) {
 		Index:          "active_notifications_index",
 		GeoHexId:       []string{"a"},
 		LastConsumedId: 1,
-		Category:       "",
+		Categories:     []string{"a"},
 		PageIndex:      0,
 		PageSize:       10,
 	})

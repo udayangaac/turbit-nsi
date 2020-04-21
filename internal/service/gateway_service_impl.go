@@ -54,7 +54,7 @@ func (g *gatewayService) Add(ctx context.Context, document Document) (err error)
 		EndDate:          document.EndDate,
 		LogoCompany:      document.LogoCompany,
 		ImagePublisher:   document.ImagePublisher,
-		Category:         document.Category,
+		Categories:       document.Categories,
 		GeoHexIds:        hexIds,
 		Locations:        locations,
 	}
@@ -95,7 +95,7 @@ func (g *gatewayService) Update(ctx context.Context, document Document) (err err
 		EndDate:          document.EndDate,
 		LogoCompany:      document.LogoCompany,
 		ImagePublisher:   document.ImagePublisher,
-		Category:         document.Category,
+		Categories:       document.Categories,
 		GeoHexIds:        hexIds,
 		Locations:        locations,
 	}
@@ -104,39 +104,41 @@ func (g *gatewayService) Update(ctx context.Context, document Document) (err err
 
 func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (notifications Notifications, err error) {
 
+	geoHexId := ""
+	summery := geo_classifier.LocationSummery{}
+
 	notifications = Notifications{
 		Offset:    -1,
 		RefId:     "NONE",
 		Documents: make([]elasticsearch.Document, 0),
 	}
-	summery := geo_classifier.LocationSummery{}
 	userDetails := geo_classifier.UserDetail{
 		Latitude:  param.Lat,
 		Longitude: param.Lon,
 		Offset:    0,
 		UserId:    param.UserId,
 	}
+
 	if summery, err = g.ExtServiceContainer.GeoClassifier.GetLocationSummery(ctx, userDetails); err != nil {
 		return
 	}
 
-	if summery.Data.CurrentOffset == -1 {
+	if summery.Data.CurrentOffset == -1 && param.IsOffsetEnable {
 		return
 	}
 
-	geoHexId := ""
-	geoHexId, err = getGeoHexId(summery.Data.GeoRef)
-	if err != nil {
+	if geoHexId, err = getGeoHexId(summery.Data.GeoRef); err != nil {
 		return
 	}
+
 	// geo reference generator
 	criteria := elasticsearch.Criteria{
 		Index:          elasticsearch.ActiveNotificationsIndex,
 		GeoHexId:       []string{geoHexId},
 		LastConsumedId: int64(summery.Data.CurrentOffset),
-		Category:       "",
+		Categories:     param.Categories,
 		PageIndex:      0,
-		PageSize:       10,
+		PageSize:       20,
 	}
 
 	notifications.Documents, err = g.ExtServiceContainer.ESConnector.GetDocuments(ctx, criteria)
