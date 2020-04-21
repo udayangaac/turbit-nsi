@@ -93,7 +93,7 @@ func (s *connector) GetDocuments(ctx context.Context, criteria Criteria) (docs [
 	)
 
 	src, _ := query.Source()
-	data, _ := json.MarshalIndent(src, "", "")
+	data, _ := json.MarshalIndent(src, "", " ")
 	fmt.Printf("%s", data)
 	searchResult, err = s.Client.Search().
 		Index(criteria.Index).
