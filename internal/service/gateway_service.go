@@ -6,7 +6,7 @@ import (
 )
 
 type Notifications struct {
-	Offset    int64
+	Offset    int
 	RefId     string
 	Documents []elasticsearch.Document
 }

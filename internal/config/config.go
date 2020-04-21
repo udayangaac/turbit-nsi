@@ -7,4 +7,5 @@ func InitConfigurations() {
 	EnvConf.Read(fileManager)
 	DatabaseConf.Read(fileManager)
 	ElasticsearchConf.Read(fileManager)
+	GeoClassifierConf.Read(fileManager)
 }

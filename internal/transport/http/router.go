@@ -31,7 +31,7 @@ func (w *WebService) Init() {
 		ModifyNotificationHandler(w.Services)).Methods(http.MethodPut)
 
 	tnsiRouter.HandleFunc("/notifications",
-		GetNotificationsHandler(w.Services)).Methods(http.MethodGet)
+		GetNotificationsHandler(w.Services)).Methods(http.MethodPost)
 
 	log.Info(log_traceable.GetMessage(context.Background(), "Server is starting, Port:"+fmt.Sprintf("%v", w.Port)))
 	w.server = &http.Server{
@@ -58,6 +58,9 @@ func (w *WebService) Stop() {
 
 func AddNotificationHandler(services service.Container) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
+
+		ctx := getTraceableContext(request)
+
 		req := schema.NotificationRequest{}
 		decoder := json.NewDecoder(request.Body)
 		err := decoder.Decode(&req)
@@ -93,7 +96,7 @@ func AddNotificationHandler(services service.Container) http.HandlerFunc {
 			Category:         req.Category,
 			Locations:        locations,
 		}
-		err = services.GatewayService.Add(request.Context(), doc)
+		err = services.GatewayService.Add(ctx, doc)
 		if err != nil {
 			writer.WriteHeader(http.StatusInternalServerError)
 			return
@@ -116,6 +119,9 @@ func AddNotificationHandler(services service.Container) http.HandlerFunc {
 
 func ModifyNotificationHandler(services service.Container) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
+
+		ctx := getTraceableContext(request)
+
 		req := schema.NotificationRequest{}
 		decoder := json.NewDecoder(request.Body)
 		err := decoder.Decode(&req)
@@ -151,13 +157,13 @@ func ModifyNotificationHandler(services service.Container) http.HandlerFunc {
 			Category:         req.Category,
 			Locations:        locations,
 		}
-		err = services.GatewayService.Update(request.Context(), doc)
+		err = services.GatewayService.Update(ctx, doc)
 		if err != nil {
 			writer.WriteHeader(http.StatusInternalServerError)
 			return
 		} else {
 			writer.Header().Set("Content-Type", "application/json")
-			writer.WriteHeader(http.StatusBadRequest)
+			writer.WriteHeader(http.StatusOK)
 
 			msg := schema.SuccessMessage{
 				Message: "Modified notification successfully !",
@@ -174,13 +180,16 @@ func ModifyNotificationHandler(services service.Container) http.HandlerFunc {
 
 func GetNotificationsHandler(services service.Container) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
+
+		ctx := getTraceableContext(request)
+
 		req := schema.GetNotificationRequest{}
 
 		decoder := json.NewDecoder(request.Body)
 		err := decoder.Decode(&req)
 		if err != nil {
 			writer.Header().Set("Content-Type", "application/json")
-			writer.WriteHeader(http.StatusBadRequest)
+			writer.WriteHeader(http.StatusOK)
 			if err := json.NewEncoder(writer).Encode(schema.ErrorResp{Message: "invalid request"}); err != nil {
 				writer.WriteHeader(http.StatusInternalServerError)
 				return
@@ -193,6 +202,7 @@ func GetNotificationsHandler(services service.Container) http.HandlerFunc {
 			Lat:      req.Lat,
 			Lon:      req.Lon,
 			GeoRefId: req.GeoRefId,
+			UserId:   req.UserId,
 		}
 
 		//// latitude
@@ -222,13 +232,13 @@ func GetNotificationsHandler(services service.Container) http.HandlerFunc {
 		//}
 
 		notifications := service.Notifications{}
-		notifications, err = services.GatewayService.GetNotifications(request.Context(), param)
+		notifications, err = services.GatewayService.GetNotifications(ctx, param)
 		if err != nil {
 			writer.WriteHeader(http.StatusInternalServerError)
 			return
 		} else {
 			writer.Header().Set("Content-Type", "application/json")
-			writer.WriteHeader(http.StatusBadRequest)
+			writer.WriteHeader(http.StatusOK)
 			if err = json.NewEncoder(writer).Encode(schema.SuccessResp{Data: notifications}); err != nil {
 				writer.WriteHeader(http.StatusInternalServerError)
 				return

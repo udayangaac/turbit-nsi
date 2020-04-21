@@ -37,4 +37,5 @@ type GetNotificationRequest struct {
 	Lat      string `json:"lat"`
 	Lon      string `json:"lon"`
 	GeoRefId string `json:"geo_ref_id"`
+	UserId   int    `json:"user_id"`
 }

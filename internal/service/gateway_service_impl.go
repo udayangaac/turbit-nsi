@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
+	"errors"
 	external_service "github.com/udayangaac/turbit-nsi/internal/external-service"
 	"github.com/udayangaac/turbit-nsi/internal/external-service/elasticsearch"
 	geo_classifier "github.com/udayangaac/turbit-nsi/internal/external-service/geo-classifier"
+	"strings"
 )
 
 type gatewayService struct {
@@ -102,10 +104,14 @@ func (g *gatewayService) Update(ctx context.Context, document Document) (err err
 
 func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (notifications Notifications, err error) {
 
-	notifications = Notifications{}
+	notifications = Notifications{
+		Offset:    -1,
+		RefId:     "NONE",
+		Documents: make([]elasticsearch.Document, 0),
+	}
 	summery := geo_classifier.LocationSummery{}
 	userDetails := geo_classifier.UserDetail{
-		Latitude:  param.Lon,
+		Latitude:  param.Lat,
 		Longitude: param.Lon,
 		Offset:    0,
 		UserId:    param.UserId,
@@ -114,15 +120,41 @@ func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (not
 		return
 	}
 
+	if summery.Data.CurrentOffset == -1 {
+		return
+	}
+
+	geoHexId := ""
+	geoHexId, err = getGeoHexId(summery.Data.GeoRef)
+	if err != nil {
+		return
+	}
 	// geo reference generator
 	criteria := elasticsearch.Criteria{
 		Index:          elasticsearch.ActiveNotificationsIndex,
-		GeoHexId:       []string{summery.Data.GeoRef},
+		GeoHexId:       []string{geoHexId},
 		LastConsumedId: int64(summery.Data.CurrentOffset),
 		Category:       "",
 		PageIndex:      0,
 		PageSize:       10,
 	}
+
 	notifications.Documents, err = g.ExtServiceContainer.ESConnector.GetDocuments(ctx, criteria)
+	notifications.Offset = summery.Data.CurrentOffset
+	// Geo reference id
+	notifications.RefId = summery.Data.GeoRef
 	return
+}
+
+func getGeoHexId(userGeoRef string) (geoRef string, err error) {
+	arr := strings.Split(userGeoRef, "_")
+	if arr == nil {
+		err = errors.New("invalid user geo reference id")
+		return
+	}
+	if len(arr) != 2 {
+		err = errors.New("invalid user geo reference id")
+		return
+	}
+	return arr[0], nil
 }

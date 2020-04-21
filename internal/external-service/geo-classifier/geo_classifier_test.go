@@ -15,9 +15,9 @@ func TestNewGeoClassifier(t *testing.T) {
 }
 
 func TestGeoClassifier_GetLocationSummery(t *testing.T) {
-	gc := NewGeoClassifier("http://localhost:8001")
+	gc := NewGeoClassifier("http://localhost:3002")
 	detail := UserDetail{
-		UserId:    2020,
+		UserId:    200,
 		Latitude:  "6.714360",
 		Longitude: "81.059219",
 		Offset:    0,
