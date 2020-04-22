@@ -4,12 +4,12 @@
 <br/>
 
 This Service responsible for getting notification list based on location (Phase one)
-######  Overview
+###  Overview
 ![Overall View](/docs/overall_view_phase_one.png)
 
-##### APIs
+### APIs
 
-######  Add Notification
+####  Add Notification
 
 - Request
 ```
@@ -51,7 +51,7 @@ Content-Type: application/json
 ```
 
 
-######  Modify Notification
+####  Modify Notification
 
 - Request
 ```
@@ -91,7 +91,7 @@ Content-Type: application/json
 }
 ```
 
-######  Get Notifications
+####  Get Notifications
 
 - Request
 ```
@@ -144,4 +144,38 @@ Content-Type: application/json
 }
 ```
 
+### NSI Client Example
+
+
+```go
+func TestNewNSIConnector(t *testing.T) {
+	connector := NewNSIConnector(`<serviceURL>`)
+	req := RequestBody{
+		Lat:        "6.814360",
+		Lon:        "81.059219",
+		GeoRefID:   "0x886102cde9fffff",
+		UserID:     3,
+		Categories: []string{"food"},
+		IsNewest:   false,
+	}
+	notifications, gid, err := connector.GetNotifications(context.Background(), req)
+	if err != nil {
+		t.Error(err.Error())
+	}
+	t.Log(notifications, gid)/"lat": "6.814360",
+	req := RequestBody{
+		Lat:        "6.814360",
+		Lon:        "81.059219",
+		GeoRefID:   "0x886102cde9fffff",
+		UserID:     3,
+		Categories: []string{"food"},
+		IsNewest:   false,
+	}
+	notifications, gid, err := connector.GetNotifications(context.Background(), req)
+	if err != nil {
+		t.Error(err.Error())
+	}
+	t.Log(notifications, gid)
+}
+```
 
