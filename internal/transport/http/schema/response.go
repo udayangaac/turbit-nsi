@@ -14,5 +14,5 @@ type SuccessMessage struct {
 
 type UserNotifications struct {
 	GeoRefId      string      `json:"geo_ref_id"`
-	Notifications interface{} `json:"notification"`
+	Notifications interface{} `json:"notifications"`
 }
