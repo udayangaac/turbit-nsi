@@ -11,3 +11,8 @@ type ErrorResp struct {
 type SuccessMessage struct {
 	Message string `json:"message"`
 }
+
+type UserNotifications struct {
+	GeoRefId      string      `json:"geo_ref_id"`
+	Notifications interface{} `json:"notification"`
+}

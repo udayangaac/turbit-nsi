@@ -11,6 +11,7 @@ import (
 	"github.com/udayangaac/turbit-nsi/internal/service"
 	"github.com/udayangaac/turbit-nsi/internal/transport/http/schema"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -135,6 +136,30 @@ func ModifyNotificationHandler(services service.Container) http.HandlerFunc {
 			}
 		}
 
+		vars := mux.Vars(request)
+		if vars == nil {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			if err := json.NewEncoder(writer).Encode(schema.ErrorResp{Message: "invalid request"}); err != nil {
+				writer.WriteHeader(http.StatusInternalServerError)
+				return
+			} else {
+				return
+			}
+		}
+
+		req.ID, err = strconv.ParseInt(vars["notificationId"], 10, 32)
+		if err != nil {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			if err := json.NewEncoder(writer).Encode(schema.ErrorResp{Message: "invalid request"}); err != nil {
+				writer.WriteHeader(http.StatusInternalServerError)
+				return
+			} else {
+				return
+			}
+		}
+
 		locations := []service.Location{}
 
 		for _, val := range req.Locations {
@@ -145,7 +170,6 @@ func ModifyNotificationHandler(services service.Container) http.HandlerFunc {
 		}
 
 		doc := service.Document{
-			Id:               req.ID,
 			CompanyName:      req.CompanyName,
 			Content:          req.Content,
 			NotificationType: req.NotificationType,
@@ -240,7 +264,13 @@ func GetNotificationsHandler(services service.Container) http.HandlerFunc {
 		} else {
 			writer.Header().Set("Content-Type", "application/json")
 			writer.WriteHeader(http.StatusOK)
-			if err = json.NewEncoder(writer).Encode(schema.SuccessResp{Data: notifications}); err != nil {
+
+			data := schema.UserNotifications{
+				GeoRefId:      notifications.RefId,
+				Notifications: notifications.Documents,
+			}
+
+			if err = json.NewEncoder(writer).Encode(schema.SuccessResp{Data: data}); err != nil {
 				writer.WriteHeader(http.StatusInternalServerError)
 				return
 			} else {
