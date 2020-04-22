@@ -47,6 +47,7 @@ func (n *nsiConnector) GetNotifications(ctx context.Context, param RequestBody) 
 	if payload, err = json.Marshal(param); err != nil {
 		return
 	}
+
 	if req, err = http.NewRequest(http.MethodPost, url, bytes.NewBuffer(payload)); err != nil {
 		return
 	}
@@ -58,15 +59,18 @@ func (n *nsiConnector) GetNotifications(ctx context.Context, param RequestBody) 
 	if res, err = n.Client.Do(req); err != nil {
 		return
 	}
+
 	defer func() {
 		err = res.Body.Close()
 		if err != nil {
 			log.Error(log_traceable.GetMessage(ctx, "Unable close the body of the request"))
 		}
 	}()
+
 	err = json.NewDecoder(res.Body).Decode(&body)
 	if err != nil {
 		return
 	}
+
 	return body.Data.Notifications, body.Data.GeoRefID, err
 }
