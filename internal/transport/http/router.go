@@ -96,6 +96,9 @@ func AddNotificationHandler(services service.Container) http.HandlerFunc {
 			Categories:       req.Categories,
 			Locations:        locations,
 		}
+		docStr, _ := json.MarshalIndent(doc, "", "\t")
+		log.Trace(log_traceable.GetMessage(ctx, fmt.Sprintf("Added document request details \n%s", docStr)))
+
 		err = services.GatewayService.Add(ctx, doc)
 		if err != nil {
 			writer.WriteHeader(http.StatusInternalServerError)
