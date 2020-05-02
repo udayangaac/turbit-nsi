@@ -150,7 +150,7 @@ func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (not
 		return
 	}
 
-	for k, v := range documents {
+	for _, v := range documents {
 		formattedDocuments = append(formattedDocuments, FormattedDocument{
 			Id:               v.Id,
 			CompanyName:      v.CompanyName,

@@ -2,13 +2,12 @@ package service
 
 import (
 	"context"
-	"github.com/udayangaac/turbit-nsi/internal/external-service/elasticsearch"
 )
 
 type Notifications struct {
 	//Offset    int                      `json:"offset"`
-	RefId     string                   `json:"ref_id"`
-	Documents []elasticsearch.Document `json:"documents"`
+	RefId     string              `json:"ref_id"`
+	Documents []FormattedDocument `json:"documents"`
 }
 
 type Param struct {
@@ -17,6 +16,18 @@ type Param struct {
 	UserId         int
 	IsOffsetEnable bool
 	Categories     []string
+}
+
+type FormattedDocument struct {
+	Id               int64    `json:"id"`
+	CompanyName      string   `json:"company_name"`
+	Content          string   `json:"content"`
+	NotificationType int      `json:"notification_type"`
+	StartTime        string   `json:"start_time"`
+	EndDate          string   `json:"end_date"`
+	LogoCompany      string   `json:"logo_company"`
+	ImagePublisher   string   `json:"image_publisher"`
+	Categories       []string `json:"categories"`
 }
 
 type Document struct {
