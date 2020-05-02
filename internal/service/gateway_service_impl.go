@@ -110,7 +110,7 @@ func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (not
 	notifications = Notifications{
 		// Offset:    -1,
 		RefId:     "",
-		Documents: make([]elasticsearch.Document, 0),
+		Documents: make([]FormattedDocument, 0),
 	}
 
 	userDetails := geo_classifier.UserDetail{
@@ -143,9 +143,30 @@ func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (not
 		PageSize:       20,
 	}
 
-	notifications.Documents, err = g.ExtServiceContainer.ESConnector.GetDocuments(ctx, criteria)
+	formattedDocuments := make([]FormattedDocument, 0)
+	documents := make([]elasticsearch.Document, 0)
+	documents, err = g.ExtServiceContainer.ESConnector.GetDocuments(ctx, criteria)
+	if err != nil {
+		return
+	}
+
+	for k, v := range documents {
+		formattedDocuments = append(formattedDocuments, FormattedDocument{
+			Id:               v.Id,
+			CompanyName:      v.CompanyName,
+			Content:          v.Content,
+			NotificationType: v.NotificationType,
+			StartTime:        v.StartTime,
+			EndDate:          v.EndDate,
+			LogoCompany:      v.LogoCompany,
+			ImagePublisher:   v.ImagePublisher,
+			Categories:       v.Categories,
+		})
+	}
+
 	// notifications.Offset = summery.Data.CurrentOffset
 	// Geo reference id
+	notifications.Documents = formattedDocuments
 	notifications.RefId = summery.Data.GeoRef
 	return
 }
