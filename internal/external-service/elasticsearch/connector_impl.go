@@ -9,10 +9,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	elastic "github.com/olivere/elastic/v7"
 	log "github.com/sirupsen/logrus"
 	"github.com/udayangaac/turbit-nsi/internal/config"
-	"strings"
 )
 
 type connector struct {
@@ -90,12 +91,19 @@ func (s *connector) GetDocuments(ctx context.Context, criteria Criteria) (docs [
 	for _, v := range criteria.Categories {
 		categoriesStr = append(categoriesStr, v)
 	}
+	var query *elastic.BoolQuery
 
-	query := elastic.NewBoolQuery().Must(
-		elastic.NewTermsQuery("geo_hex_ids", strings.Join(criteria.GeoHexId, ",")),
-		elastic.NewTermsQuery("categories", categoriesStr...),
-		elastic.NewRangeQuery("id").Gt(criteria.LastConsumedId).IncludeLower(true).IncludeUpper(false),
-	)
+	if criteria.TextSearchEnable {
+		query = elastic.NewBoolQuery().Must(
+			elastic.NewMatchQuery("company_name", criteria.SearchTerm),
+		)
+	} else {
+		query = elastic.NewBoolQuery().Must(
+			elastic.NewTermsQuery("geo_hex_ids", strings.Join(criteria.GeoHexId, ",")),
+			elastic.NewTermsQuery("categories", categoriesStr...),
+			elastic.NewRangeQuery("id").Gt(criteria.LastConsumedId).IncludeLower(true).IncludeUpper(false),
+		)
+	}
 
 	src, _ := query.Source()
 	data, _ := json.MarshalIndent(src, "", " ")

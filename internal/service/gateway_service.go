@@ -16,6 +16,7 @@ type Param struct {
 	UserId         int
 	IsOffsetEnable bool
 	Categories     []string
+	SearchText     string
 }
 
 type FormattedDocument struct {

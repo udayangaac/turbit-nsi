@@ -33,12 +33,14 @@ type Location struct {
 }
 
 type Criteria struct {
-	Index          string
-	GeoHexId       []string
-	LastConsumedId int64
-	Categories     []string
-	PageIndex      int
-	PageSize       int
+	Index            string
+	GeoHexId         []string
+	LastConsumedId   int64
+	Categories       []string
+	PageIndex        int
+	PageSize         int
+	TextSearchEnable bool
+	SearchTerm       string
 }
 
 const ActiveNotificationsIndex = "active_notifications_index"
