@@ -3,10 +3,11 @@ package service
 import (
 	"context"
 	"errors"
+	"strings"
+
 	external_service "github.com/udayangaac/turbit-nsi/internal/external-service"
 	"github.com/udayangaac/turbit-nsi/internal/external-service/elasticsearch"
 	geo_classifier "github.com/udayangaac/turbit-nsi/internal/external-service/geo-classifier"
-	"strings"
 )
 
 type gatewayService struct {
@@ -108,7 +109,6 @@ func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (not
 	summery := geo_classifier.LocationSummery{}
 
 	notifications = Notifications{
-		// Offset:    -1,
 		RefId:     "",
 		Documents: make([]FormattedDocument, 0),
 	}
@@ -141,6 +141,13 @@ func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (not
 		Categories:     param.Categories,
 		PageIndex:      0,
 		PageSize:       20,
+	}
+
+	if len(param.SearchText) == 0 {
+		criteria.TextSearchEnable = false
+	} else {
+		criteria.TextSearchEnable = true
+		criteria.SearchTerm = param.SearchText
 	}
 
 	formattedDocuments := make([]FormattedDocument, 0)

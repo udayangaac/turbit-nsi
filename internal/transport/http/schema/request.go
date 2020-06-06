@@ -40,4 +40,5 @@ type GetNotificationRequest struct {
 	UserId     int      `json:"user_id"`
 	Categories []string `json:"categories"`
 	IsNewest   bool     `json:"is_newest"`
+	SearchTerm string   `json:"search_term"`
 }

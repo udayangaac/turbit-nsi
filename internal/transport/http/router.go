@@ -4,15 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	log_traceable "github.com/udayangaac/turbit-nsi/internal/lib/log-traceable"
 	"github.com/udayangaac/turbit-nsi/internal/service"
 	"github.com/udayangaac/turbit-nsi/internal/transport/http/schema"
-	"net/http"
-	"strconv"
-	"time"
 )
 
 type WebService struct {
@@ -231,6 +232,7 @@ func GetNotificationsHandler(services service.Container) http.HandlerFunc {
 			UserId:         req.UserId,
 			IsOffsetEnable: req.IsNewest,
 			Categories:     req.Categories,
+			SearchText:     req.SearchTerm,
 		}
 
 		//// latitude
