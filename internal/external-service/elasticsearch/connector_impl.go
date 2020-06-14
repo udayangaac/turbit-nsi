@@ -94,8 +94,11 @@ func (s *connector) GetDocuments(ctx context.Context, criteria Criteria) (docs [
 	var query *elastic.BoolQuery
 
 	if criteria.TextSearchEnable {
+		//query = elastic.NewBoolQuery().Must(
+		//	elastic.NewMatchQuery("company_name", criteria.SearchTerm),
+		//)
 		query = elastic.NewBoolQuery().Must(
-			elastic.NewMatchQuery("company_name", criteria.SearchTerm),
+			elastic.NewMultiMatchQuery(criteria.SearchTerm, "company_name^3", "categories^2", "content"),
 		)
 	} else {
 		query = elastic.NewBoolQuery().Must(
