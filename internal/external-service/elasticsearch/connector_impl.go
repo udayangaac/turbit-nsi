@@ -91,12 +91,9 @@ func (s *connector) GetDocuments(ctx context.Context, criteria Criteria) (docs [
 	for _, v := range criteria.Categories {
 		categoriesStr = append(categoriesStr, v)
 	}
-	var query *elastic.BoolQuery
 
+	var query *elastic.BoolQuery
 	if criteria.TextSearchEnable {
-		//query = elastic.NewBoolQuery().Must(
-		//	elastic.NewMatchQuery("company_name", criteria.SearchTerm),
-		//)
 		query = elastic.NewBoolQuery().Must(
 			elastic.NewMultiMatchQuery(criteria.SearchTerm, "company_name^3", "categories^2", "content"),
 		)

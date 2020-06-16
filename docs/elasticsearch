@@ -8,3 +8,19 @@ PUT /active_notifications_index
     "index": "active_notifications_index"
 }
 
+
+
+curl -X POST \
+  http://localhost:9200/active_notifications_index/_delete_by_query \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -H 'postman-token: 9242d29b-1cee-ea26-47f9-af4dd7f63981' \
+  -d '{
+    "query": {
+        "range" : {
+            "id" : {
+                "lte" : 138
+            }
+        }
+    }
+}'
