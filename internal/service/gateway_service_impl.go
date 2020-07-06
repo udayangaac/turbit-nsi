@@ -178,6 +178,11 @@ func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (not
 	return
 }
 
+func (g *gatewayService) DeleteNotification(ctx context.Context, id int64) (err error) {
+	err = g.ExtServiceContainer.ESConnector.DeleteDocument(ctx, id)
+	return
+}
+
 func getGeoHexId(userGeoRef string) (geoRef string, err error) {
 	arr := strings.Split(userGeoRef, "_")
 	if arr == nil {

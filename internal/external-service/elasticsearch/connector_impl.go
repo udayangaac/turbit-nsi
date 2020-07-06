@@ -128,3 +128,8 @@ func (s *connector) GetDocuments(ctx context.Context, criteria Criteria) (docs [
 	}
 	return
 }
+
+func (s *connector) DeleteDocument(ctx context.Context, id int64) (err error) {
+	_, err = s.Client.Delete().Id(fmt.Sprintf("%v", id)).Do(ctx)
+	return
+}

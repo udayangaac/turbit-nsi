@@ -53,4 +53,5 @@ type GatewayService interface {
 	Add(ctx context.Context, document Document) (err error)
 	Update(ctx context.Context, document Document) (err error)
 	GetNotifications(ctx context.Context, param Param) (notifications Notifications, err error)
+	DeleteNotification(ctx context.Context, id int64) (err error)
 }

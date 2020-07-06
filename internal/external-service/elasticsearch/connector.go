@@ -48,4 +48,5 @@ const ActiveNotificationsIndex = "active_notifications_index"
 type Connector interface {
 	AddDocument(ctx context.Context, index string, doc Document) (err error)
 	GetDocuments(ctx context.Context, criteria Criteria) (docs []Document, err error)
+	DeleteDocument(ctx context.Context, id int64) (err error)
 }

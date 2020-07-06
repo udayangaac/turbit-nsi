@@ -35,6 +35,9 @@ func (w *WebService) Init() {
 	tnsiRouter.HandleFunc("/notifications",
 		GetNotificationsHandler(w.Services)).Methods(http.MethodPost)
 
+	tnsiRouter.HandleFunc("/notification/{notificationId}",
+		DeleteNotificationHandler(w.Services)).Methods(http.MethodDelete)
+
 	log.Info(log_traceable.GetMessage(context.Background(), "Server is starting, Port:"+fmt.Sprintf("%v", w.Port)))
 	w.server = &http.Server{
 		Addr:         fmt.Sprintf(":%v", w.Port),
@@ -260,6 +263,91 @@ func GetNotificationsHandler(services service.Container) http.HandlerFunc {
 		//		return
 		//	}
 		//}
+
+		notifications := service.Notifications{}
+		notifications, err = services.GatewayService.GetNotifications(ctx, param)
+		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			return
+		} else {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+
+			data := schema.UserNotifications{
+				GeoRefId:      notifications.RefId,
+				Notifications: notifications.Documents,
+			}
+
+			if err = json.NewEncoder(writer).Encode(schema.SuccessResp{Data: data}); err != nil {
+				writer.WriteHeader(http.StatusInternalServerError)
+				return
+			} else {
+				return
+			}
+		}
+	}
+}
+
+func DeleteNotificationHandler(services service.Container) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		ctx := getTraceableContext(request)
+		vars := mux.Vars(request)
+		id, err := strconv.ParseInt(vars["notificationId"], 10, 32)
+		if err != nil {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusBadRequest)
+			if err := json.NewEncoder(writer).Encode(schema.ErrorResp{Message: "invalid request"}); err != nil {
+				writer.WriteHeader(http.StatusInternalServerError)
+				return
+			} else {
+				return
+			}
+		}
+		if err = services.GatewayService.DeleteNotification(ctx, id); err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			return
+		} else {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			if err := json.NewEncoder(writer).Encode(schema.SuccessMessage{Message: fmt.Sprintf("successfully delete the notification ID: %v", id)}); err != nil {
+				writer.WriteHeader(http.StatusInternalServerError)
+				return
+			} else {
+				return
+			}
+		}
+	}
+}
+
+func Handler(services service.Container) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+
+		ctx := getTraceableContext(request)
+
+		req := schema.GetNotificationRequest{}
+
+		decoder := json.NewDecoder(request.Body)
+		err := decoder.Decode(&req)
+		if err != nil {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusOK)
+			if err := json.NewEncoder(writer).Encode(schema.ErrorResp{Message: "invalid request"}); err != nil {
+				writer.WriteHeader(http.StatusInternalServerError)
+				return
+			} else {
+				return
+			}
+		}
+
+		param := service.Param{
+			Lat:            req.Lat,
+			Lon:            req.Lon,
+			GeoRefId:       req.GeoRefId,
+			UserId:         req.UserId,
+			IsOffsetEnable: req.IsNewest,
+			Categories:     req.Categories,
+			SearchText:     req.SearchTerm,
+		}
 
 		notifications := service.Notifications{}
 		notifications, err = services.GatewayService.GetNotifications(ctx, param)
