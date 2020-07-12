@@ -50,7 +50,7 @@ type UserActionParam struct {
 	UserId         int64 `json:"user_id"`
 	NotificationId int64 `json:"notification_id"`
 	UserReaction   int16 `json:"user_reaction"`
-	Status         int16 `json:"status"`
+	IsViewed       bool  `json:"is_viewed"`
 }
 
 type Location struct {

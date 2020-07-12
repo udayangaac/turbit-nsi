@@ -45,5 +45,5 @@ type GetNotificationRequest struct {
 
 type UpdateUserActionRequest struct {
 	UserReaction int16 `json:"user_reaction"`
-	Status       int16 `json:"status"`
+	IsViewed     bool  `json:"is_viewed"`
 }

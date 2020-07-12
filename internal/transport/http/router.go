@@ -311,7 +311,7 @@ func UpdateUserActionHandler(services service.Container) http.HandlerFunc {
 			UserId:         0,
 			NotificationId: 0,
 			UserReaction:   req.UserReaction,
-			Status:         req.Status,
+			IsViewed:       req.IsViewed,
 		}
 
 		vars := mux.Vars(request)

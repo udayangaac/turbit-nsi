@@ -202,21 +202,15 @@ func (g *gatewayService) DeleteNotification(ctx context.Context, id int64) (err 
 }
 
 func (g *gatewayService) UpdateUserAction(ctx context.Context, param UserActionParam) (err error) {
-	const (
-		viewed = 1
-	)
+
 	doc := elasticsearch.UserActionDocument{
 		Id:             fmt.Sprintf("%v_%v", param.NotificationId, param.UserId),
 		UserId:         param.UserId,
 		NotificationId: param.NotificationId,
 		UserReaction:   param.UserReaction,
+		IsViewed:       param.IsViewed,
 	}
-	switch param.Status {
-	case viewed:
-		doc.IsViewed = true
-	default:
-		doc.IsViewed = false
-	}
+
 	err = g.ExtServiceContainer.ESConnector.AddUserActionDocument(ctx, doc)
 	return
 }
