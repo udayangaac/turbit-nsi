@@ -338,7 +338,7 @@ func UpdateUserActionHandler(services service.Container) http.HandlerFunc {
 			writer.Header().Set("Content-Type", "application/json")
 			writer.WriteHeader(http.StatusOK)
 			if err := json.NewEncoder(writer).Encode(schema.SuccessMessage{
-				Message: fmt.Sprintf("Successfully added  user(%v) for notification: %v",
+				Message: fmt.Sprintf("Successfully updated  user(%v) action for notification Id: %v",
 					param.UserId, param.NotificationId)}); err != nil {
 				writer.WriteHeader(http.StatusInternalServerError)
 				return
