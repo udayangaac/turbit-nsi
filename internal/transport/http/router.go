@@ -324,7 +324,7 @@ func UpdateUserActionHandler(services service.Container) http.HandlerFunc {
 			handlerError(writer, "invalid request")
 			return
 		}
-		param.UserId, err = strconv.ParseInt(vars["notificationId"], 10, 32)
+		param.UserId, err = strconv.ParseInt(vars["userId"], 10, 32)
 		if err != nil {
 			handlerError(writer, "invalid request")
 			return

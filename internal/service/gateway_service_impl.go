@@ -206,7 +206,7 @@ func (g *gatewayService) UpdateUserAction(ctx context.Context, param UserActionP
 		viewed = 1
 	)
 	doc := elasticsearch.UserActionDocument{
-		Id:             fmt.Sprintf("%v-%v", param.NotificationId, param.UserId),
+		Id:             fmt.Sprintf("%v_%v", param.NotificationId, param.UserId),
 		UserId:         param.UserId,
 		NotificationId: param.NotificationId,
 		UserReaction:   param.UserReaction,
