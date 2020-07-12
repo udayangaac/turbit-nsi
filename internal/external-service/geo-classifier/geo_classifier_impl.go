@@ -91,7 +91,6 @@ func (g *geoClassifier) AddRecord(ctx context.Context, detail GeoRecordDetail) (
 			log.Error(log_traceable.GetMessage(ctx, "Unable close the body of the request"))
 		}
 	}()
-
 	err = json.NewDecoder(res.Body).Decode(&record)
 	return
 }

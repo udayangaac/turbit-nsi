@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	external_service "github.com/udayangaac/turbit-nsi/internal/external-service"
@@ -59,7 +60,7 @@ func (g *gatewayService) Add(ctx context.Context, document Document) (err error)
 		GeoHexIds:        hexIds,
 		Locations:        locations,
 	}
-	return g.ExtServiceContainer.ESConnector.AddDocument(ctx, "active_notifications_index", doc)
+	return g.ExtServiceContainer.ESConnector.AddDocument(ctx, doc)
 }
 
 func (g *gatewayService) Update(ctx context.Context, document Document) (err error) {
@@ -100,7 +101,7 @@ func (g *gatewayService) Update(ctx context.Context, document Document) (err err
 		GeoHexIds:        hexIds,
 		Locations:        locations,
 	}
-	return g.ExtServiceContainer.ESConnector.AddDocument(ctx, "active_notifications_index", doc)
+	return g.ExtServiceContainer.ESConnector.AddDocument(ctx, doc)
 }
 
 func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (notifications Notifications, err error) {
@@ -135,12 +136,12 @@ func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (not
 
 	// geo reference generator
 	criteria := elasticsearch.Criteria{
-		Index:          elasticsearch.ActiveNotificationsIndex,
 		GeoHexId:       []string{geoHexId},
 		LastConsumedId: int64(summery.Data.CurrentOffset),
 		Categories:     param.Categories,
 		PageIndex:      0,
 		PageSize:       20,
+		UserId:         param.UserId,
 	}
 
 	if len(param.SearchText) == 0 {
@@ -152,13 +153,19 @@ func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (not
 
 	formattedDocuments := make([]FormattedDocument, 0)
 	documents := make([]elasticsearch.Document, 0)
+	userActionDocumentsMap := make(map[int64]elasticsearch.UserActionDocument)
+
 	documents, err = g.ExtServiceContainer.ESConnector.GetDocuments(ctx, criteria)
+	if err != nil {
+		return
+	}
+	userActionDocumentsMap, err = g.ExtServiceContainer.ESConnector.GetUserActionDocuments(ctx, criteria)
 	if err != nil {
 		return
 	}
 
 	for _, v := range documents {
-		formattedDocuments = append(formattedDocuments, FormattedDocument{
+		formattedDocument := FormattedDocument{
 			Id:               v.Id,
 			CompanyName:      v.CompanyName,
 			Content:          v.Content,
@@ -168,7 +175,12 @@ func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (not
 			LogoCompany:      v.LogoCompany,
 			ImagePublisher:   v.ImagePublisher,
 			Categories:       v.Categories,
-		})
+		}
+		if value, ok := userActionDocumentsMap[v.Id]; ok {
+			formattedDocument.UserReaction = value.UserReaction
+			formattedDocument.IsViewed = value.IsViewed
+		}
+		formattedDocuments = append(formattedDocuments, formattedDocument)
 	}
 
 	// notifications.Offset = summery.Data.CurrentOffset
@@ -180,6 +192,26 @@ func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (not
 
 func (g *gatewayService) DeleteNotification(ctx context.Context, id int64) (err error) {
 	err = g.ExtServiceContainer.ESConnector.DeleteDocument(ctx, id)
+	return
+}
+
+func (g *gatewayService) UpdateUserAction(ctx context.Context, param UserActionParam) (err error) {
+	const (
+		viewed = 1
+	)
+	doc := elasticsearch.UserActionDocument{
+		Id:             fmt.Sprintf("%v-%v", param.NotificationId, param.UserId),
+		UserId:         param.UserId,
+		NotificationId: param.NotificationId,
+		UserReaction:   param.UserReaction,
+	}
+	switch param.Status {
+	case viewed:
+		doc.IsViewed = true
+	default:
+		doc.IsViewed = false
+	}
+	err = g.ExtServiceContainer.ESConnector.AddUserActionDocument(ctx, doc)
 	return
 }
 

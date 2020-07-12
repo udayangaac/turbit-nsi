@@ -38,6 +38,9 @@ func (w *WebService) Init() {
 	tnsiRouter.HandleFunc("/notification/{notificationId}",
 		DeleteNotificationHandler(w.Services)).Methods(http.MethodDelete)
 
+	tnsiRouter.HandleFunc("/user/{userId}/notification/{notificationId}",
+		UpdateUserActionHandler(w.Services)).Methods(http.MethodPost)
+
 	log.Info(log_traceable.GetMessage(context.Background(), "Server is starting, Port:"+fmt.Sprintf("%v", w.Port)))
 	w.server = &http.Server{
 		Addr:         fmt.Sprintf(":%v", w.Port),
@@ -237,33 +240,6 @@ func GetNotificationsHandler(services service.Container) http.HandlerFunc {
 			Categories:     req.Categories,
 			SearchText:     req.SearchTerm,
 		}
-
-		//// latitude
-		//param.Lat, err = strconv.ParseFloat(req.Lat, 64)
-		//if err != nil {
-		//	writer.Header().Set("Content-Type", "application/json")
-		//	writer.WriteHeader(http.StatusBadRequest)
-		//	if err := json.NewEncoder(writer).Encode(schema.ErrorResp{Message: "invalid latitude in path variable"}); err != nil {
-		//		writer.WriteHeader(http.StatusInternalServerError)
-		//		return
-		//	} else {
-		//		return
-		//	}
-		//}
-		//
-		//// latitude
-		//param.Lon, err = strconv.ParseFloat(req.Lon, 64)
-		//if err != nil {
-		//	writer.Header().Set("Content-Type", "application/json")
-		//	writer.WriteHeader(http.StatusBadRequest)
-		//	if err := json.NewEncoder(writer).Encode(schema.ErrorResp{Message: "invalid longitude in path variable"}); err != nil {
-		//		writer.WriteHeader(http.StatusInternalServerError)
-		//		return
-		//	} else {
-		//		return
-		//	}
-		//}
-
 		notifications := service.Notifications{}
 		notifications, err = services.GatewayService.GetNotifications(ctx, param)
 		if err != nil {
@@ -319,51 +295,51 @@ func DeleteNotificationHandler(services service.Container) http.HandlerFunc {
 	}
 }
 
-func Handler(services service.Container) http.HandlerFunc {
+func UpdateUserActionHandler(services service.Container) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 
 		ctx := getTraceableContext(request)
-
-		req := schema.GetNotificationRequest{}
-
+		req := schema.UpdateUserActionRequest{}
 		decoder := json.NewDecoder(request.Body)
 		err := decoder.Decode(&req)
 		if err != nil {
-			writer.Header().Set("Content-Type", "application/json")
-			writer.WriteHeader(http.StatusOK)
-			if err := json.NewEncoder(writer).Encode(schema.ErrorResp{Message: "invalid request"}); err != nil {
-				writer.WriteHeader(http.StatusInternalServerError)
-				return
-			} else {
-				return
-			}
+			handlerError(writer, "Invalid request")
+			return
 		}
 
-		param := service.Param{
-			Lat:            req.Lat,
-			Lon:            req.Lon,
-			GeoRefId:       req.GeoRefId,
-			UserId:         req.UserId,
-			IsOffsetEnable: req.IsNewest,
-			Categories:     req.Categories,
-			SearchText:     req.SearchTerm,
+		param := service.UserActionParam{
+			UserId:         0,
+			NotificationId: 0,
+			UserReaction:   req.UserReaction,
+			Status:         req.Status,
 		}
 
-		notifications := service.Notifications{}
-		notifications, err = services.GatewayService.GetNotifications(ctx, param)
+		vars := mux.Vars(request)
+		if vars == nil {
+			handlerError(writer, "invalid request")
+			return
+		}
+		param.NotificationId, err = strconv.ParseInt(vars["notificationId"], 10, 32)
+		if err != nil {
+			handlerError(writer, "invalid request")
+			return
+		}
+		param.UserId, err = strconv.ParseInt(vars["notificationId"], 10, 32)
+		if err != nil {
+			handlerError(writer, "invalid request")
+			return
+		}
+
+		err = services.GatewayService.UpdateUserAction(ctx, param)
 		if err != nil {
 			writer.WriteHeader(http.StatusInternalServerError)
 			return
 		} else {
 			writer.Header().Set("Content-Type", "application/json")
 			writer.WriteHeader(http.StatusOK)
-
-			data := schema.UserNotifications{
-				GeoRefId:      notifications.RefId,
-				Notifications: notifications.Documents,
-			}
-
-			if err = json.NewEncoder(writer).Encode(schema.SuccessResp{Data: data}); err != nil {
+			if err := json.NewEncoder(writer).Encode(schema.SuccessMessage{
+				Message: fmt.Sprintf("Successfully added  user(%v) for notification: %v",
+					param.UserId, param.NotificationId)}); err != nil {
 				writer.WriteHeader(http.StatusInternalServerError)
 				return
 			} else {
@@ -378,4 +354,15 @@ func getTraceableContext(req *http.Request) (ctx context.Context) {
 	ctx = context.WithValue(req.Context(), "uuid_str", uuidStr)
 	log.Trace(log_traceable.GetMessage(ctx, "Started to process request URL:", req.URL, "Method:", req.Method))
 	return
+}
+
+func handlerError(writer http.ResponseWriter, message string) {
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusBadRequest)
+	if err := json.NewEncoder(writer).Encode(schema.ErrorResp{Message: message}); err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	} else {
+		return
+	}
 }

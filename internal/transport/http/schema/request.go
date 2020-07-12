@@ -42,3 +42,8 @@ type GetNotificationRequest struct {
 	IsNewest   bool     `json:"is_newest"`
 	SearchTerm string   `json:"search_term"`
 }
+
+type UpdateUserActionRequest struct {
+	UserReaction int16 `json:"user_reaction"`
+	Status       int16 `json:"status"`
+}

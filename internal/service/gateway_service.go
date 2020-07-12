@@ -29,6 +29,8 @@ type FormattedDocument struct {
 	LogoCompany      string   `json:"logo_company"`
 	ImagePublisher   string   `json:"image_publisher"`
 	Categories       []string `json:"categories"`
+	UserReaction     int16    `json:"user_reaction"`
+	IsViewed         bool     `json:"is_viewed"`
 }
 
 type Document struct {
@@ -44,6 +46,13 @@ type Document struct {
 	Locations        []Location `json:"locations"`
 }
 
+type UserActionParam struct {
+	UserId         int64 `json:"user_id"`
+	NotificationId int64 `json:"notification_id"`
+	UserReaction   int16 `json:"user_reaction"`
+	Status         int16 `json:"status"`
+}
+
 type Location struct {
 	Lat string `json:"lat"`
 	Lon string `json:"lon"`
@@ -54,4 +63,5 @@ type GatewayService interface {
 	Update(ctx context.Context, document Document) (err error)
 	GetNotifications(ctx context.Context, param Param) (notifications Notifications, err error)
 	DeleteNotification(ctx context.Context, id int64) (err error)
+	UpdateUserAction(ctx context.Context, param UserActionParam) (err error)
 }

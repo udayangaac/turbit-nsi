@@ -27,13 +27,21 @@ type Document struct {
 	GeoHexIds        []string   `json:"geo_hex_ids"`
 }
 
+type UserActionDocument struct {
+	Id             string `json:"id"`
+	UserId         int64  `json:"user_id"`
+	NotificationId int64  `json:"notification_id"`
+	UserReaction   int16  `json:"user_reaction"`
+	IsViewed       bool   `json:"is_viewed"`
+}
+
 type Location struct {
 	Lat string `json:"lat"`
 	Lon string `json:"lon"`
 }
 
 type Criteria struct {
-	Index            string
+	UserId           int
 	GeoHexId         []string
 	LastConsumedId   int64
 	Categories       []string
@@ -43,10 +51,15 @@ type Criteria struct {
 	SearchTerm       string
 }
 
-const ActiveNotificationsIndex = "active_notifications_index"
+const (
+	ActiveNotificationsIndex = "active_notifications_index"
+	UserActionsIndex         = "user_actions_index"
+)
 
 type Connector interface {
-	AddDocument(ctx context.Context, index string, doc Document) (err error)
+	AddDocument(ctx context.Context, doc Document) (err error)
 	GetDocuments(ctx context.Context, criteria Criteria) (docs []Document, err error)
 	DeleteDocument(ctx context.Context, id int64) (err error)
+	AddUserActionDocument(ctx context.Context, doc UserActionDocument) (err error)
+	GetUserActionDocuments(ctx context.Context, criteria Criteria) (docs map[int64]UserActionDocument, err error)
 }

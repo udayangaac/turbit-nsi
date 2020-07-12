@@ -52,7 +52,7 @@ func (s *connector) initClient(ctx context.Context) (err error) {
 	return
 }
 
-func (s *connector) AddDocument(ctx context.Context, index string, doc Document) (err error) {
+func (s *connector) AddDocument(ctx context.Context, doc Document) (err error) {
 	var indexResult *elastic.IndexResponse
 	if s.Client == nil {
 		if err = s.initClient(ctx); err != nil {
@@ -62,7 +62,7 @@ func (s *connector) AddDocument(ctx context.Context, index string, doc Document)
 	}
 
 	indexResult, err = s.Client.Index().
-		Index(index).
+		Index(ActiveNotificationsIndex).
 		BodyJson(&doc).
 		Id(fmt.Sprintf("%v", doc.Id)).
 		Do(ctx)
@@ -109,7 +109,7 @@ func (s *connector) GetDocuments(ctx context.Context, criteria Criteria) (docs [
 	data, _ := json.MarshalIndent(src, "", " ")
 	fmt.Printf("%s", data)
 	searchResult, err = s.Client.Search().
-		Index(criteria.Index).
+		Index(ActiveNotificationsIndex).
 		Query(query).
 		From(criteria.PageIndex).
 		Size(criteria.PageSize).Do(ctx)
@@ -130,6 +130,69 @@ func (s *connector) GetDocuments(ctx context.Context, criteria Criteria) (docs [
 }
 
 func (s *connector) DeleteDocument(ctx context.Context, id int64) (err error) {
-	_, err = s.Client.Delete().Id(fmt.Sprintf("%v", id)).Do(ctx)
+	_, err = s.Client.Delete().Index(ActiveNotificationsIndex).Id(fmt.Sprintf("%v", id)).Do(ctx)
+	return
+}
+
+func (s *connector) AddUserActionDocument(ctx context.Context, doc UserActionDocument) (err error) {
+	var indexResult *elastic.IndexResponse
+	if s.Client == nil {
+		if err = s.initClient(ctx); err != nil {
+			log.Error(ctx, fmt.Sprintf("Unable to reconnect, Error : %v", err.Error()))
+			return err
+		}
+	}
+	indexResult, err = s.Client.Index().
+		Index(UserActionsIndex).
+		BodyJson(&doc).
+		Id(doc.Id).
+		Do(ctx)
+	if err != nil {
+		log.Error(ctx, fmt.Sprintf("Unable to index the user action document document Doc : %v  Error : %v", doc, err.Error()))
+		return
+	}
+	if indexResult == nil {
+		log.Error(ctx, fmt.Sprintf("Expected result to be != nil; got: %v", indexResult))
+	}
+	return
+}
+
+func (s *connector) GetUserActionDocuments(ctx context.Context, criteria Criteria) (docs map[int64]UserActionDocument, err error) {
+
+	docs = make(map[int64]UserActionDocument, 0)
+	var searchResult *elastic.SearchResult
+	if s.Client == nil {
+		if err = s.initClient(ctx); err != nil {
+			log.Error(ctx, fmt.Sprintf("Unable to reconnect, Error : %v", err.Error()))
+			return
+		}
+	}
+
+	var query *elastic.BoolQuery
+
+	query = elastic.NewBoolQuery().Must(
+		elastic.NewTermsQuery("user_id", criteria.UserId),
+	)
+	src, _ := query.Source()
+	data, _ := json.MarshalIndent(src, "", " ")
+	fmt.Printf("%s", data)
+	searchResult, err = s.Client.Search().
+		Index(UserActionsIndex).
+		Query(query).
+		From(criteria.PageIndex).
+		Size(criteria.PageSize).Do(ctx)
+	if searchResult != nil {
+		if len(searchResult.Hits.Hits) > 0 {
+			for _, hit := range searchResult.Hits.Hits {
+				doc := UserActionDocument{}
+				sourceStr, _ := hit.Source.MarshalJSON()
+				err := json.Unmarshal(sourceStr, &doc)
+				if err != nil {
+					continue
+				}
+				docs[doc.NotificationId] = doc
+			}
+		}
+	}
 	return
 }
