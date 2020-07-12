@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	log "github.com/sirupsen/logrus"
+	log_traceable "github.com/udayangaac/turbit-nsi/internal/lib/log-traceable"
 	"strings"
 
 	external_service "github.com/udayangaac/turbit-nsi/internal/external-service"
@@ -122,6 +124,7 @@ func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (not
 	}
 
 	if summery, err = g.ExtServiceContainer.GeoClassifier.GetLocationSummery(ctx, userDetails); err != nil {
+		log.Error(log_traceable.GetMessage(ctx, "Unable to get locations. Error:"+err.Error()))
 		return // err
 	}
 
@@ -131,7 +134,8 @@ func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (not
 	}
 
 	if geoHexId, err = getGeoHexId(summery.Data.GeoRef); err != nil {
-		return // err
+		log.Error(log_traceable.GetMessage(ctx, "Unable to get hex Id. Error:"+err.Error()))
+		return
 	}
 
 	// geo reference generator
@@ -157,10 +161,12 @@ func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (not
 
 	documents, err = g.ExtServiceContainer.ESConnector.GetDocuments(ctx, criteria)
 	if err != nil {
+		log.Error(log_traceable.GetMessage(ctx, "Unable to get active notification documents. Error:"+err.Error()))
 		return
 	}
 	userActionDocumentsMap, err = g.ExtServiceContainer.ESConnector.GetUserActionDocuments(ctx, criteria)
 	if err != nil {
+		log.Error(log_traceable.GetMessage(ctx, "Unable to get user action documents. Error:"+err.Error()))
 		return
 	}
 
