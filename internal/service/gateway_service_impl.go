@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	log "github.com/sirupsen/logrus"
@@ -158,6 +159,8 @@ func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (not
 	formattedDocuments := make([]FormattedDocument, 0)
 	documents := make([]elasticsearch.Document, 0)
 	userActionDocumentsMap := make(map[int64]elasticsearch.UserActionDocument)
+	userActionDocumentsMapByteArr, _ := json.Marshal(userActionDocumentsMap)
+	log.Error(log_traceable.GetMessage(ctx, fmt.Sprintf("User reactions for %v data %s", param.UserId, userActionDocumentsMapByteArr)))
 
 	documents, err = g.ExtServiceContainer.ESConnector.GetDocuments(ctx, criteria)
 	if err != nil {
