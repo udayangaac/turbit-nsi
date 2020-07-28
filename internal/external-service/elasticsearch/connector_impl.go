@@ -136,7 +136,7 @@ func (s *connector) DeleteDocument(ctx context.Context, id int64) (err error) {
 }
 
 func (s *connector) AddUserActionDocument(ctx context.Context, doc UserActionDocument) (err error) {
-	docByteArr, _ := json.Marshal(doc)
+	docByteArr, _ := json.MarshalIndent(doc, "", "\t")
 	log.Info(log_traceable.GetMessage(ctx, fmt.Sprintf("User Reaction Doc %s", docByteArr)))
 
 	var indexResult *elastic.IndexResponse
@@ -186,7 +186,7 @@ func (s *connector) GetUserActionDocuments(ctx context.Context, criteria Criteri
 		From(criteria.PageIndex).
 		Size(criteria.PageSize).Do(ctx)
 	if searchResult != nil {
-		docByteArr, _ := json.Marshal(searchResult.Hits.Hits)
+		docByteArr, _ := json.MarshalIndent(searchResult.Hits.Hits, "", "\t")
 		log.Info(log_traceable.GetMessage(ctx, fmt.Sprintf("Hits %s", docByteArr)))
 
 		if len(searchResult.Hits.Hits) > 0 {
