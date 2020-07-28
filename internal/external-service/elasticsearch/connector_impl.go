@@ -135,6 +135,9 @@ func (s *connector) DeleteDocument(ctx context.Context, id int64) (err error) {
 }
 
 func (s *connector) AddUserActionDocument(ctx context.Context, doc UserActionDocument) (err error) {
+	docByteArr, _ := json.Marshal(doc)
+	log.Info(ctx, fmt.Sprintf("User Reaction Doc %s", docByteArr))
+
 	var indexResult *elastic.IndexResponse
 	if s.Client == nil {
 		if err = s.initClient(ctx); err != nil {
