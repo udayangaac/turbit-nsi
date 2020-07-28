@@ -331,7 +331,7 @@ func UpdateUserActionHandler(services service.Container) http.HandlerFunc {
 		}
 
 		paramStr, _ := json.Marshal(param)
-		log.Trace(log_traceable.GetMessage(ctx, fmt.Sprintf("Update user reaction %s", paramStr)))
+		log.Info(log_traceable.GetMessage(ctx, fmt.Sprintf("Update user reaction %s", paramStr)))
 
 		err = services.GatewayService.UpdateUserAction(ctx, param)
 		if err != nil {
