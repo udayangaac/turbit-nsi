@@ -159,8 +159,6 @@ func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (not
 	formattedDocuments := make([]FormattedDocument, 0)
 	documents := make([]elasticsearch.Document, 0)
 	userActionDocumentsMap := make(map[int64]elasticsearch.UserActionDocument)
-	userActionDocumentsMapByteArr, _ := json.Marshal(userActionDocumentsMap)
-	log.Info(log_traceable.GetMessage(ctx, fmt.Sprintf("User reactions for %v data %s", param.UserId, userActionDocumentsMapByteArr)))
 
 	documents, err = g.ExtServiceContainer.ESConnector.GetDocuments(ctx, criteria)
 	if err != nil {
@@ -196,6 +194,10 @@ func (g *gatewayService) GetNotifications(ctx context.Context, param Param) (not
 	// Geo reference id
 	notifications.Documents = formattedDocuments
 	notifications.RefId = summery.Data.GeoRef
+
+	userActionDocumentsMapByteArr, _ := json.Marshal(userActionDocumentsMap)
+	log.Info(log_traceable.GetMessage(ctx, fmt.Sprintf("User reactions for %v data %s", param.UserId, userActionDocumentsMapByteArr)))
+
 	return
 }
 
