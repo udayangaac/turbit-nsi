@@ -9,6 +9,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	log_traceable "github.com/udayangaac/turbit-nsi/internal/lib/log-traceable"
 	"strings"
 
 	elastic "github.com/olivere/elastic/v7"
@@ -136,7 +137,7 @@ func (s *connector) DeleteDocument(ctx context.Context, id int64) (err error) {
 
 func (s *connector) AddUserActionDocument(ctx context.Context, doc UserActionDocument) (err error) {
 	docByteArr, _ := json.Marshal(doc)
-	log.Info(ctx, fmt.Sprintf("User Reaction Doc %s", docByteArr))
+	log.Info(log_traceable.GetMessage(ctx, fmt.Sprintf("User Reaction Doc %s", docByteArr)))
 
 	var indexResult *elastic.IndexResponse
 	if s.Client == nil {
@@ -151,11 +152,11 @@ func (s *connector) AddUserActionDocument(ctx context.Context, doc UserActionDoc
 		Id(doc.Id).
 		Do(ctx)
 	if err != nil {
-		log.Error(ctx, fmt.Sprintf("Unable to index the user action document document Doc : %v  Error : %v", doc, err.Error()))
+		log.Error(fmt.Sprintf("Unable to index the user action document document Doc : %v  Error : %v", doc, err.Error()))
 		return
 	}
 	if indexResult == nil {
-		log.Error(ctx, fmt.Sprintf("Expected result to be != nil; got: %v", indexResult))
+		log.Error(fmt.Sprintf("Expected result to be != nil; got: %v", indexResult))
 	}
 	return
 }
@@ -185,6 +186,9 @@ func (s *connector) GetUserActionDocuments(ctx context.Context, criteria Criteri
 		From(criteria.PageIndex).
 		Size(criteria.PageSize).Do(ctx)
 	if searchResult != nil {
+		docByteArr, _ := json.Marshal(searchResult.Hits.Hits)
+		log.Info(log_traceable.GetMessage(ctx, fmt.Sprintf("Hits %s", docByteArr)))
+
 		if len(searchResult.Hits.Hits) > 0 {
 			for _, hit := range searchResult.Hits.Hits {
 				doc := UserActionDocument{}
